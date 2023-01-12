@@ -35,26 +35,24 @@ failed = 0
 passed = 0
 with open(args.plist, 'rb') as fp:
     pl = plistlib.load(fp)
-    
+
 sortedpl = OrderedDict(sorted(pl.items()))
 data = [["Rule ID", "Result"]]
-for rule,result in sortedpl.items():
+for rule, result in sortedpl.items():
     if rule == "lastComplianceCheck":
         continue
-    for k,v in result.items():
-        if v == True:
-            failed += 1
+    for k, v in result.items():
         if v == False:
             passed += 1
+        elif v == True:
+            failed += 1
         entry = [rule,v]
         data.append(entry)
-    
+
 entries = len(data)
 minrow = len(data)+1
 maxrow = len(data)+2
-data.append(["failed",failed])
-data.append(["passed",passed])
-
+data.extend((["failed",failed], ["passed",passed]))
 wb = Workbook()
 ws = wb.active
 
@@ -72,7 +70,7 @@ ws.add_chart(pie, "D1")
 
 savefile = str()
 
-if ".xlsx" == args.output[-5:]: 
+if args.output[-5:] == ".xlsx": 
     savefile= args.output
 else:
     savefile = args.output + ".xlsx"
@@ -89,7 +87,7 @@ plt.legend(title = "Compliance Scan Results")
 
 temp_dir = tempfile.TemporaryDirectory()
 tmppng = temp_dir.name + "/pie.png"
-plt.savefig(tmppng,dpi=72) 
+plt.savefig(tmppng,dpi=72)
 b64png = base64.b64encode(open(tmppng, "rb").read())
 pngimg = b64png.decode('ascii')
 
